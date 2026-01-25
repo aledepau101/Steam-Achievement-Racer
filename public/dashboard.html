@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Achievement Racer</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js"></script>
+</head>
+<body class="race-body">
+    <div class=side-panel>
+      <img id="profile-pic" alt="Logged in Users Steam Profile Picture" width="64">
+      <p id ="profile-greeting">Let's Start Racing!</p>
+      <p id ="user-name"></p>
+    </div>
+    <div class="race-game">
+      <div class="player1">
+        <img id="profile-pic-player" alt="Logged in Users Steam Profile Picture" width="64">
+        <p id ="user-name-player1"></p>
+      </div>
+      <div class="player2">
+        <img id="profile-pic-player2" alt="Logged in Users Steam Profile Picture" width="64" src="Images/questionmark.jpg">
+        <p id ="user-name-player2">Select User</p>
+      </div>
+    </div>
+
+
+    <script>
+      fetch('/api/me')
+      .then(r => r.json())
+      .then(user => {
+        document.getElementById('profile-pic').src = user.avatar;
+        document.getElementById('profile-pic-player').src = user.avatar;
+        document.getElementById('user-name').textContent = user.username;
+        document.getElementById('user-name-player1').textContent = user.username;
+      });
+    </script>
+
+</body>
+</html>
+
+
+
+ 

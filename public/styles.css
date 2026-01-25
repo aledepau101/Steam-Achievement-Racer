@@ -1,0 +1,123 @@
+#header {
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+    background-color: rgb(26, 26, 26);
+    padding: 10px;
+}
+
+body{
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: rgb(43, 40, 40);
+}
+
+#background-imgs {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; 
+    opacity: 0.3;
+}
+
+button:hover{
+    transform: scale(1.1)
+}
+
+#steam-racer-logo{
+    width: 600px;
+}
+
+.side-panel{
+    background-color: rgb(66, 65, 65);
+    height: 1000px;
+    width: 300px;
+}
+
+.race-body{
+    display: flex;
+    background-color: rgb(29, 29, 32);
+}
+
+#race-profile-pic{
+    display: flex;
+
+}
+
+.race-game{
+    display: flex;
+}
+
+#main-content {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+}
+
+#profile-greeting{
+    display: flex;
+    color:white;
+    font-weight: bolder;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding-left: 80px;
+    position: relative;
+    top: -70px;
+}
+
+#profile-pic{
+    border-radius: 30px;
+}
+
+#profile-pic-player{
+    width: 100px;
+}
+
+#profile-pic-player2{
+    width: 100px;
+}
+
+
+#user-name{
+    display: flex;
+    color:rgb(53, 145, 211);
+    font-weight: bolder;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding-left: 80px;
+    position: relative;
+    top: -70px;
+}
+
+
+.player1{
+    margin-top: 15vh;
+    margin-left: 30vh;
+}
+
+.player2{
+    margin-top: 15vh;
+    margin-left: 62vh;
+}
+
+
+#user-name-player1{
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+#user-name-player2{
+    color: rgb(212, 59, 59);
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+
+
+
+
+
