@@ -119,6 +119,8 @@ app.get('/api/common-games', ensureAuthenticated, async (req, res) => {
         const commonGames = userGames.filter(game => friendGameIds.has(game.appid));
 
         console.log('Common games: ', commonGames);
+        res.json(commonGames);
+
     }
     catch(error){
         return res.status(500).json({error: 'Failed to get common games'});
