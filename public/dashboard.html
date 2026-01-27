@@ -5,40 +5,114 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Steam Achievement Racer</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="script.js"></script>
 </head>
 <body class="race-body">
-    <div class=side-panel>
+    <div class="side-panel">
       <img id="profile-pic" alt="Logged in Users Steam Profile Picture" width="64">
-      <p id ="profile-greeting">Let's Start Racing!</p>
-      <p id ="user-name"></p>
+      <p id="profile-greeting">Let's Start Racing!</p>
+      <p id="user-name"></p>
     </div>
+    
     <div class="race-game">
       <div class="player1">
         <img id="profile-pic-player" alt="Logged in Users Steam Profile Picture" width="64">
-        <p id ="user-name-player1"></p>
-      </div>
-      <div class="player2">
-        <img id="profile-pic-player2" alt="Logged in Users Steam Profile Picture" width="64" src="Images/questionmark.jpg">
-        <p id ="user-name-player2">Select User</p>
+        <p id="user-name-player1"></p>
       </div>
     </div>
+    
+    <div class="player2">
+        <img id="profile-pic-player2" alt="Logged in Users Steam Profile Picture" width="64" src="Images/questionmark.jpg">
+        <div class="custom-dropdown" id="player2-dropdown">
+            <div class="dropdown-selected">Select a friend</div>
+            <div class="dropdown-items" id="dropdown-items" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <div id="game-selection-container" style="display: none;">
+        <h3>Pick a game to race:</h3>
+        <select id="game-dropdown">
+            <option value="">Loading games...</option>
+        </select>
+        <button id="start-race-btn" style="display: none;">Start Race!</button>
+    </div>
 
-
-    <script>
-      fetch('/api/me')
-      .then(r => r.json())
-      .then(user => {
+<script>
+    // Load user profile
+    fetch('/api/me')
+    .then(r => r.json())
+    .then(user => {
         document.getElementById('profile-pic').src = user.avatar;
         document.getElementById('profile-pic-player').src = user.avatar;
         document.getElementById('user-name').textContent = user.username;
         document.getElementById('user-name-player1').textContent = user.username;
-      });
-    </script>
+    });
+    
+    // Friend selection dropdown
+    const player2Icon = document.getElementById('profile-pic-player2');
+    const dropdown = document.getElementById('player2-dropdown');
+    const selected = dropdown.querySelector('.dropdown-selected');
+    const itemsContainer = document.getElementById('dropdown-items');
+
+    selected.addEventListener('click', async () => {
+        const isVisible = itemsContainer.style.display === 'block';
+        itemsContainer.style.display = isVisible ? 'none' : 'block';
+        
+        if (!isVisible && itemsContainer.children.length === 0) {
+            const response = await fetch('/api/friends');
+            const data = await response.json();
+            
+            data.forEach(friend => {
+                const div = document.createElement('div');
+                div.className = 'dropdown-item';
+                div.innerHTML = `<img src="${friend.avatar}"> ${friend.personaname}`;
+                div.onclick = async () => {
+                    selected.textContent = friend.personaname;
+                    itemsContainer.style.display = 'none';
+                    player2Icon.src = friend.avatarfull;
+                    
+                    // THIS IS WHERE WE CALL loadCommonGames
+                    await loadCommonGames(friend.steamid);
+                };
+                itemsContainer.appendChild(div);
+            });
+        }
+    });
+
+    
+    async function loadCommonGames(friendId) {
+        document.getElementById('game-selection-container').style.display = 'block';
+
+        const dropdown = document.getElementById('game-dropdown');
+        dropdown.innerHTML = '<option value="">Loading...</option>'; 
+
+        try {
+            const response = await fetch(`/api/common-games?friendId=${friendId}`);
+            const games = await response.json();
+
+            dropdown.innerHTML = ''; // Clears the dropdown
+
+            // Checks if there are no common games
+            if (games.length === 0) {
+                dropdown.innerHTML = '<option value="">No common games found</option>';
+                return;
+            }
+
+            games.forEach(game => {
+                const option = document.createElement('option');
+                option.value = game.appid;
+                option.textContent = game.name;
+                dropdown.appendChild(option);
+            });
+
+            // Shows the start race button
+            document.getElementById('start-race-btn').style.display = 'block';
+            
+        } catch (error) {
+            console.error('Error: ', error);
+            dropdown.innerHTML = '<option value="">Error loading games</option>';
+        }
+    }
+</script>
 
 </body>
 </html>
-
-
-
- 

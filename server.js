@@ -5,6 +5,7 @@ const session = require('express-session');
 const passport = require('passport');
 const SteamStrategy = require('passport-steam').Strategy;
 
+
 //Start Server
 const app = express();
 
@@ -69,68 +70,60 @@ app.get('/api/me', ensureAuthenticated, (req, res) => {
   });
 });
 
-app.get('/api/games', ensureAuthenticated, async (req, res) => {
-    try {
-        //Get the logged-in user's SteamID
-        const steamID = req.user.id;
-
-        //Build the Steam API URL
-        const apiKey = process.env.STEAM_API_KEY;
-        const url = `http://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${apiKey}&steamid=${steamID}&include_appinfo=1&include_played_free_games=1`;
-
-        //Fetch data from Steam API
-        const response = await fetch(url);
-        const data = await response.json();
-
-        //Extract the games array
-        const games = data.response.games || [];
-
-        //Map to only the fields relevant
-        const simplifiedGames = games.map(game => ({
-            appid: game.appid,
-            name: game.name
-        }));
-
-        //Send JSON back to frontend
-        res.json(simplifiedGames);
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to fetch games' });
-    }
-});
-
 app.get('/api/friends', ensureAuthenticated, async (req, res) => {
-    try {
-        const steamID = req.user.id;
-        const apiKey = process.env.STEAM_API_KEY;
-        
-        // Get friends list
-        const friendsUrl = `http://api.steampowered.com/ISteamUser/GetFriendList/v1/?key=${apiKey}&steamid=${steamID}&relationship=friend`;
-        const friendsResponse = await fetch(friendsUrl);
-        const friendsData = await friendsResponse.json();
-        
-        const friends = friendsData.friendslist?.friends || [];
-        
-        // Get detailed info for all friends
-        const steamids = friends.map(f => f.steamid).join(',');
-        const summariesUrl = `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${apiKey}&steamids=${steamids}`;
-        const summariesResponse = await fetch(summariesUrl);
-        const summariesData = await summariesResponse.json();
-        
-        const friendsList = summariesData.response.players.map(player => ({
-            steamid: player.steamid,
-            username: player.personaname,
-            avatar: player.avatarfull || player.avatarmedium || player.avatar
-        }));
-        
-        res.json(friendsList);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to fetch friends' });
-    }
+  const steamId = req.user.id;
+  const url = `http://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key=${process.env.STEAM_API_KEY}&steamid=${steamId}&relationship=friend`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    // Get all friend Steam IDs
+    const friendIds = data.friendslist.friends.map(f => f.steamid).join(',');
+    
+    // Get their info (usernames and avatars)
+    const summariesUrl = `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${process.env.STEAM_API_KEY}&steamids=${friendIds}`;
+    const summariesResponse = await fetch(summariesUrl);
+    const summariesData = await summariesResponse.json();
+    
+    res.json(summariesData.response.players);
+  } catch (error) {
+    res.status(500).json({error: 'Failed to get friends'});
+  }
 });
 
+app.get('/api/common-games', ensureAuthenticated, async (req, res) => {
+    const userId = req.user.id;
+    const friendId = req.query.friendId; //Retrieves friends steam id.
+
+    if(!friendId){
+        return res.status(400).json({error: 'Friend ID required'});
+    }
+    try{
+        const userGamesUrl = `http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${process.env.STEAM_API_KEY}&steamid=${userId}&include_appinfo=1&include_played_free_games=1`;
+        const userGamesResponse = await fetch(userGamesUrl);
+        const userGamesData = await userGamesResponse.json();
+
+        console.log('Users games:', userGamesData);
+
+        const friendGamesUrl = `http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${process.env.STEAM_API_KEY}&steamid=${friendId}&include_appinfo=1&include_played_free_games=1`;
+        const friendGamesResponse = await fetch(friendGamesUrl);
+        const friendGamesData = await friendGamesResponse.json();
+
+        console.log('Friends games:', friendGamesData);
+
+        const userGames = userGamesData.response.games || [];
+        const friendGames = friendGamesData.response.games || [];
+        const friendGameIds = new Set(friendGames.map(game => game.appid));
+
+        const commonGames = userGames.filter(game => friendGameIds.has(game.appid));
+
+        console.log('Common games: ', commonGames);
+    }
+    catch(error){
+        return res.status(500).json({error: 'Failed to get common games'});
+    }
+});
 
 app.get('/dashboard', ensureAuthenticated, (req, res) => {
   res.sendFile(__dirname + '/public/dashboard.html');
