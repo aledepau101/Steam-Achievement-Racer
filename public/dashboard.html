@@ -193,11 +193,17 @@
     }
 
     document.getElementById('start-race-btn').addEventListener('click', async () => {
-        const gameDropdown = document.getElementById('game-dropdown');
-        const selectedAppId = gameDropdown.value; 
+    const gameDropdown = document.getElementById('game-dropdown');
+    const selectedAppId = gameDropdown.value; 
 
+    try {
         const response = await fetch(`/api/achievements?friendId=${selectedFriendId}&appId=${selectedAppId}`);
         const data = await response.json();
+
+        if (!response.ok || data.error) {
+            alert(data.error || 'Failed to load achievements. Make sure both profiles have public game details.');
+            return;
+        }
 
         document.querySelector('.main-container').style.display = 'none';
         document.getElementById('race-view').style.display = 'block';
@@ -215,6 +221,10 @@
         document.getElementById('friend-achievement-count').textContent = data.friend.unlocked + '/' + data.total;
 
         setPolling(selectedFriendId, selectedAppId, selectedFriendName);
+    } catch (error) {
+        console.error('Error starting race:', error);
+        alert('Failed to start race. Please try again.');
+    }
     });
 
     function setPolling(friendId, appId, selectedFriendName) {

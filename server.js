@@ -132,6 +132,10 @@ app.get('/api/achievements', ensureAuthenticated, async (req, res) => {
     const friendId = req.query.friendId; 
     const appId = req.query.appId;
 
+    if(!friendId || !appId){
+        return res.status(400).json({error: 'Friend ID and App ID required'});
+    }
+
     try{
         const usersAchievementUrl = `http://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?appid=${appId}&key=${process.env.STEAM_API_KEY}&steamid=${userId}`;
         const usersAchievementResponse = await fetch(usersAchievementUrl);
@@ -141,6 +145,14 @@ app.get('/api/achievements', ensureAuthenticated, async (req, res) => {
         const friendAchievementResponse = await fetch(friendAchievementUrl);
         const friendAchievementData = await friendAchievementResponse.json();
 
+        
+        if(!usersAchievementData.playerstats || !usersAchievementData.playerstats.achievements) {
+            return res.status(400).json({error: 'Could not fetch your achievements. Your game details may be private or you don\'t own this game.'});
+        }
+
+        if(!friendAchievementData.playerstats || !friendAchievementData.playerstats.achievements) {
+            return res.status(400).json({error: 'Could not fetch friend\'s achievements. Their game details may be private or they don\'t own this game.'});
+        }
 
         const usersAchievements = usersAchievementData.playerstats.achievements || [];
         const friendsAchievements = friendAchievementData.playerstats.achievements || [];
@@ -167,6 +179,7 @@ app.get('/api/achievements', ensureAuthenticated, async (req, res) => {
         })
     }
     catch(error){
+        console.error('Achievement fetch error:', error);
         return res.status(500).json({error: 'Failed to get achievements'})
     }
 });
