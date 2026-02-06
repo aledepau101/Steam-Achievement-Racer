@@ -196,6 +196,11 @@
     const gameDropdown = document.getElementById('game-dropdown');
     const selectedAppId = gameDropdown.value; 
 
+    if (!selectedAppId) {
+        alert('Please select a game');
+        return;
+    }
+
     try {
         const response = await fetch(`/api/achievements?friendId=${selectedFriendId}&appId=${selectedAppId}`);
         const data = await response.json();

@@ -94,7 +94,7 @@ app.get('/api/friends', ensureAuthenticated, async (req, res) => {
 
 app.get('/api/common-games', ensureAuthenticated, async (req, res) => {
     const userId = req.user.id;
-    const friendId = req.query.friendId; //Retrieves friends steam id.
+    const friendId = req.query.friendId;
 
     if(!friendId){
         return res.status(400).json({error: 'Friend ID required'});
@@ -118,11 +118,33 @@ app.get('/api/common-games', ensureAuthenticated, async (req, res) => {
 
         const commonGames = userGames.filter(game => friendGameIds.has(game.appid));
 
-        console.log('Common games: ', commonGames);
-        res.json(commonGames);
+        // Filter games that have achievements
+        const gamesWithAchievements = [];
+        
+        for (const game of commonGames) {
+            try {
+                const schemaUrl = `http://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=${process.env.STEAM_API_KEY}&appid=${game.appid}`;
+                const schemaResponse = await fetch(schemaUrl);
+                const schemaData = await schemaResponse.json();
+                
+                // Check if game has achievements
+                if (schemaData.game && schemaData.game.availableGameStats && schemaData.game.availableGameStats.achievements) {
+                    const achievementCount = schemaData.game.availableGameStats.achievements.length;
+                    if (achievementCount > 0) {
+                        gamesWithAchievements.push(game);
+                    }
+                }
+            } catch (error) {
+                console.log(`Could not fetch ${game.name} (${game.appid})`);
+            }
+        }
+
+        console.log('Games with achievements: ', gamesWithAchievements);
+        res.json(gamesWithAchievements);
 
     }
     catch(error){
+        console.error('Error fetching common games:', error);
         return res.status(500).json({error: 'Failed to get common games'});
     }
 });
@@ -147,11 +169,11 @@ app.get('/api/achievements', ensureAuthenticated, async (req, res) => {
 
         
         if(!usersAchievementData.playerstats || !usersAchievementData.playerstats.achievements) {
-            return res.status(400).json({error: 'Could not fetch your achievements. Your game details may be private or you don\'t own this game.'});
+            return res.status(400).json({error: 'Could not fetch your achievements. Your game details may be private or you don\'t own this game'});
         }
 
         if(!friendAchievementData.playerstats || !friendAchievementData.playerstats.achievements) {
-            return res.status(400).json({error: 'Could not fetch friend\'s achievements. Their game details may be private or they don\'t own this game.'});
+            return res.status(400).json({error: 'Could not fetch friend\'s achievements. Their game details may be private or your friend does not own this game.'});
         }
 
         const usersAchievements = usersAchievementData.playerstats.achievements || [];
