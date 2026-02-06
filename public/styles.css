@@ -19,6 +19,18 @@ body {
     position: fixed;
 }
 
+footer {
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    color: #999;
+    font-size: 14px;
+    z-index: 1000;
+}
+
 #header {
     display: flex;
     align-items: center;
