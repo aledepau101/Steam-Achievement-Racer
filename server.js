@@ -35,8 +35,8 @@ passport.deserializeUser((user, done) => {
 // Steam strategy
 passport.use(new SteamStrategy(
   {
-    returnURL: 'http://localhost:3000/auth/steam/return',
-    realm: 'http://localhost:3000/',
+    returnURL: process.env.RETURN_URL || 'http://localhost:3000/auth/steam/return',
+    realm: process.env.REALM || 'http://localhost:3000/',
     apiKey: process.env.STEAM_API_KEY
   },
   (identifier, profile, done) => {
@@ -186,6 +186,7 @@ function ensureAuthenticated(req, res, next) {
   res.redirect('/');
 }
 
-app.listen(3000, () => {
-  console.log('Server running on http://localhost:3000');
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
