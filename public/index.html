@@ -3,27 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Steam Achievement Racer</title>
+    <title>🏁 Steam Racer</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
     <script src="script.js"></script>
 </head>
 <body>
     <div id="header">
-        <button>Home</button>
-        <button>Races</button>
-        <button>FAQ</button>
-    </div>
-    <div id="background-imgs">
-        <img src="Images/backgroundflag.png" alt="Two racing flags">
-    </div>
-
-    <div id="main-content">
-        <img id="steam-racer-logo" src="Images/Steam-Racer-1-17-2026.png" alt = "Steam Racing Logo">
-        <p>Your ultimate platform for racing 100% Steam achievements.</p>
-
-        <a href="/auth/steam">
-  	        <button>Get Started</button>
+        <img id="flag-logo" src="Images/pixelflag-removebg-preview.png" alt="Pixel Flag Icon">
+        <p id ='header-text'>Steam Racer</p>
+        <div class="spacer"></div>
+        <a href="index.html">
+            <button>Home</button>
         </a>
+        <a href="/auth/steam">
+            <img id="steam-login" src="Images/sits_02.png" alt="Steam login button">
+        </a>
+    </div>
+    <main id="homepage">
+        <p>Welcome to Steam Racer</p>
+        <div class="description">
+            <p>Love hunting for 100% achievement completion? Now you can race your friends to get there first!</p>
+            <p style="margin-top: 3vh">Steam Racer is a 1v1 achievement racing platform that turns grinding into competition.</p>
+            <p style="margin-top: 3vh">Simply pick a friend, choose from games you both own, and start racing.</p>
+            <p style="margin-top: 3vh">First to 100% completion in that game wins!</p>
+        </div>
+    </main>
+    <div id="background-imgs">
+        <img src="Images/backgroundgif.gif" alt="Pixel Art Background">
     </div>
 </body>
 </html>
+

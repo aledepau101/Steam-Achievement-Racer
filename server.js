@@ -127,6 +127,50 @@ app.get('/api/common-games', ensureAuthenticated, async (req, res) => {
     }
 });
 
+app.get('/api/achievements', ensureAuthenticated, async (req, res) => {
+    const userId = req.user.id;
+    const friendId = req.query.friendId; 
+    const appId = req.query.appId;
+
+    try{
+        const usersAchievementUrl = `http://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?appid=${appId}&key=${process.env.STEAM_API_KEY}&steamid=${userId}`;
+        const usersAchievementResponse = await fetch(usersAchievementUrl);
+        const usersAchievementData = await usersAchievementResponse.json();
+
+        const friendAchievementUrl = `http://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?appid=${appId}&key=${process.env.STEAM_API_KEY}&steamid=${friendId}`;
+        const friendAchievementResponse = await fetch(friendAchievementUrl);
+        const friendAchievementData = await friendAchievementResponse.json();
+
+
+        const usersAchievements = usersAchievementData.playerstats.achievements || [];
+        const friendsAchievements = friendAchievementData.playerstats.achievements || [];
+        
+        console.log('User achievements count:', usersAchievements.length);
+        console.log('Friend achievements count:', friendsAchievements.length);
+
+        const userUnlocked = usersAchievements.filter(achievement => achievement.achieved === 1).length
+        const friendUnlocked = friendsAchievements.filter(achievement => achievement.achieved === 1).length
+        
+        const totalNumber = usersAchievements.length;
+
+        if(totalNumber <= 0){
+          return res.status(400).json({error:'This game has no achievements.'})
+        }
+
+        const userPercentage = Math.round((userUnlocked / totalNumber) * 100);
+        const friendPercentage = Math.round((friendUnlocked / totalNumber) * 100);
+
+        res.json({
+          total: totalNumber,
+          user: {unlocked: userUnlocked, percentage: userPercentage},
+          friend: {unlocked: friendUnlocked, percentage: friendPercentage},
+        })
+    }
+    catch(error){
+        return res.status(500).json({error: 'Failed to get achievements'})
+    }
+});
+
 app.get('/dashboard', ensureAuthenticated, (req, res) => {
   res.sendFile(__dirname + '/public/dashboard.html');
 });
